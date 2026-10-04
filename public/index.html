@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1a0f24">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Cocktail Judges</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍸</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#1a0f24; --bg2:#26173a; --card:#2f1d47; --line:#46305f;
+  --ink:#fbf3ff; --mute:#b9a5cf; --lime:#c6f432; --pink:#ff5fa2; --gold:#ffc94a; --silver:#d9dde6; --bronze:#e0985a;
+  --r:18px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 Inter,system-ui,sans-serif}
+body{min-height:100dvh;padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;margin:0;letter-spacing:-.01em}
+button{font:inherit;color:inherit;border:0;cursor:pointer}
+input,textarea{font:inherit;color:var(--ink);background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;width:100%}
+input:focus,textarea:focus{outline:2px solid var(--lime);border-color:transparent}
+.wrap{max-width:560px;margin:0 auto;padding:16px}
+.hidden{display:none!important}
+.btn{background:var(--lime);color:#1a0f24;font-weight:700;padding:14px 18px;border-radius:14px;width:100%;font-size:17px}
+.btn:active{transform:scale(.98)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px dashed var(--line)}
+.btn:disabled{opacity:.5}
+.muted{color:var(--mute)}
+.small{font-size:13px}
+
+/* Header */
+header{position:sticky;top:0;z-index:5;background:linear-gradient(var(--bg) 70%,transparent);padding:calc(10px + env(safe-area-inset-top)) 16px 14px}
+header .row{max-width:560px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px}
+header h1{font-size:24px}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;white-space:nowrap}
+.live{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--lime);margin-right:6px;box-shadow:0 0 0 0 var(--lime);animation:pulse 2s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 7px transparent}100%{box-shadow:0 0 0 0 transparent}}
+
+/* Join */
+.join{min-height:100dvh;display:grid;place-items:center;padding:24px}
+.join .box{width:100%;max-width:400px;text-align:center}
+.join .glass{font-size:76px;line-height:1}
+.join h1{font-size:40px;margin:10px 0 4px}
+.join label{display:block;text-align:left;font-size:13px;color:var(--mute);margin:18px 0 6px}
+
+/* Cards */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.ck{display:flex;align-items:center;gap:14px;width:100%;text-align:left}
+.num{flex:0 0 52px;height:52px;border-radius:16px;background:var(--pink);color:#1a0f24;display:grid;place-items:center;font:800 24px Fraunces,serif}
+.ck .meta{flex:1;min-width:0}
+.ck .name{font-weight:700;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.score{text-align:right}
+.score b{font:800 22px Fraunces,serif;color:var(--lime)}
+.badge{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;background:var(--bg2);margin-right:4px}
+.badge.done{background:var(--lime);color:#1a0f24;font-weight:700}
+
+/* Bottom nav */
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--bg2);border-top:1px solid var(--line);padding:8px 8px calc(8px + env(safe-area-inset-bottom));display:flex;justify-content:center;gap:6px;z-index:6}
+nav button{flex:1;max-width:180px;background:transparent;padding:8px;border-radius:12px;color:var(--mute);font-size:13px;font-weight:600}
+nav button span{display:block;font-size:22px}
+nav button.on{background:var(--card);color:var(--ink)}
+
+/* Detail sheet */
+.sheet{position:fixed;inset:0;background:var(--bg);z-index:10;overflow-y:auto;padding-bottom:40px}
+.sheet .top{position:sticky;top:0;background:var(--bg);padding:calc(10px + env(safe-area-inset-top)) 16px 10px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line);z-index:2}
+.back{background:var(--card);width:40px;height:40px;border-radius:12px;font-size:20px}
+.sheet h2{font-size:22px}
+.sec{font:700 13px Inter;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);margin:22px 0 10px}
+.cat{margin-bottom:16px}
+.cat .lbl{display:flex;justify-content:space-between;font-weight:600;margin-bottom:6px}
+.cat .lbl b{color:var(--lime);font:800 20px Fraunces,serif}
+.pips{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
+.pips button{height:38px;border-radius:9px;background:var(--bg2);border:1px solid var(--line);font-weight:700;font-size:14px;color:var(--mute)}
+.pips button.on{background:var(--lime);color:#1a0f24;border-color:var(--lime)}
+.pips button.fill{background:#4a5d1c;color:var(--ink);border-color:#4a5d1c}
+.totalbar{display:flex;justify-content:space-between;align-items:center;background:var(--bg2);border-radius:14px;padding:12px 16px;margin:6px 0 12px}
+.totalbar b{font:800 30px Fraunces,serif;color:var(--lime)}
+
+.nm{display:flex;align-items:center;gap:10px;width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:8px;text-align:left}
+.nm.mine{border-color:var(--pink);background:#3a1d3f}
+.nm .t{flex:1;font-weight:600}
+.nm .v{font-weight:800;color:var(--pink)}
+.nm .who{font-size:12px;color:var(--mute);font-weight:400}
+.addname{display:flex;gap:8px}
+.addname .btn{width:auto;padding:12px 16px}
+
+.rv{border-top:1px solid var(--line);padding:12px 0}
+.rv:first-child{border-top:0}
+.rv .h{display:flex;justify-content:space-between;font-weight:700}
+.rv .h b{color:var(--lime)}
+.bars{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.note{background:var(--bg2);border-radius:12px;padding:10px 12px;margin-top:6px;white-space:pre-wrap}
+
+/* Leaderboard */
+.podium{display:grid;grid-template-columns:1fr 1.15fr 1fr;align-items:end;gap:8px;margin:8px 0 18px;text-align:center}
+.pod{border-radius:16px 16px 6px 6px;padding:12px 6px;color:#1a0f24}
+.pod .p{font:800 30px Fraunces,serif}
+.pod .nmx{font-weight:700;font-size:13px;line-height:1.2;margin:4px 0;word-break:break-word}
+.pod.g{background:var(--gold);min-height:170px}
+.pod.s{background:var(--silver);min-height:140px}
+.pod.b{background:var(--bronze);min-height:115px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:8px 6px;text-align:center;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--mute);font-weight:600;font-size:12px}
+td.hi{color:var(--lime);font-weight:800}
+
+.toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--lime);color:#1a0f24;font-weight:700;padding:10px 18px;border-radius:999px;z-index:20;transition:opacity .3s}
+.empty{text-align:center;padding:40px 10px}
+.empty .e{font-size:54px}
+</style>
+</head>
+<body>
+
+<!-- JOIN SCREEN -->
+<section id="join" class="join hidden">
+  <div class="box">
+    <div class="glass">🍸</div>
+    <h1>Cocktail Judges</h1>
+    <p class="muted">Rate it. Name it. Crown a winner.</p>
+    <label for="jName">Your name</label>
+    <input id="jName" maxlength="24" placeholder="e.g. Westy" autocomplete="nickname">
+    <label for="jRoom">Party code (everyone uses the same one)</label>
+    <input id="jRoom" maxlength="30" placeholder="e.g. friday-night" autocapitalize="none">
+    <p id="jErr" class="small" style="color:var(--pink);min-height:20px"></p>
+    <button class="btn" id="jGo">Let's drink 🍹</button>
+  </div>
+</section>
+
+<!-- MAIN APP -->
+<section id="app" class="hidden">
+  <header>
+    <div class="row">
+      <h1>🍸 Judges</h1>
+      <div style="display:flex;gap:6px">
+        <button class="chip" id="shareBtn"><span class="live"></span><span id="roomLbl"></span></button>
+        <button class="chip" id="meBtn" title="Change name"></button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div id="tabDrinks"></div>
+    <div id="tabBoard" class="hidden"></div>
+  </main>
+
+  <nav>
+    <button data-tab="Drinks" class="on"><span>🍹</span>Cocktails</button>
+    <button data-tab="Board"><span>🏆</span>Leaderboard</button>
+  </nav>
+</section>
+
+<!-- COCKTAIL DETAIL -->
+<section id="sheet" class="sheet hidden">
+  <div class="top">
+    <button class="back" id="closeSheet" aria-label="Back">←</button>
+    <div style="min-width:0">
+      <div class="small muted" id="shNum"></div>
+      <h2 id="shTitle"></h2>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="sec">Your score</div>
+    <div id="rateForm"></div>
+    <div class="totalbar"><span>Your total</span><span><b id="myTotal">0</b> <span class="muted">/ 50</span></span></div>
+    <label class="sec" for="notes" style="display:block">Feedback & notes</label>
+    <textarea id="notes" rows="3" maxlength="600" placeholder="Too sweet? Needs more lime? Garnish of the century?"></textarea>
+    <div style="height:12px"></div>
+    <button class="btn" id="saveRating">Submit my rating</button>
+
+    <div class="sec">Name this cocktail — vote for your fave</div>
+    <div id="nameList"></div>
+    <div class="addname">
+      <input id="newName" maxlength="40" placeholder="Suggest a name…">
+      <button class="btn" id="addNameBtn">Add</button>
+    </div>
+
+    <div class="sec">Everyone's scores</div>
+    <div class="card" id="allRatings"></div>
+  </div>
+</section>
+
+<div id="toast" class="toast hidden"></div>
+
+<script>
+// ====== CONFIG — edit categories here (keep keys in sync with api.mjs) ======
+const CATS = [
+  { key: "taste",      label: "Taste",      icon: "👅" },
+  { key: "look",       label: "Look",       icon: "👀" },
+  { key: "aroma",      label: "Aroma",      icon: "👃" },
+  { key: "balance",    label: "Balance",    icon: "⚖️" },
+  { key: "creativity", label: "Creativity", icon: "💡" },
+];
+const MAX = CATS.length * 10;
+const POLL_MS = 5000;
+
+// ====== STATE ======
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const slug = (s) => String(s || "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 30);
+
+let me = localStorage.getItem("cj_name") || "";
+let room = slug(new URLSearchParams(location.search).get("room") || localStorage.getItem("cj_room") || "");
+let S = { cocktails: [], ratings: [], names: [], votes: [] };
+let openN = null;
+let draft = {};
+let pollTimer = null;
+
+// ====== API ======
+async function api(path, body) {
+  const res = await fetch("/api/" + path, body
+    ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ room, person: me, ...body }) }
+    : {});
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "Something went wrong");
+  return data;
+}
+async function refresh() {
+  try {
+    S = await api("state?room=" + encodeURIComponent(room));
+    renderAll();
+  } catch (e) { console.warn(e); }
+}
+function startPolling() {
+  clearInterval(pollTimer);
+  pollTimer = setInterval(() => { if (!document.hidden) refresh(); }, POLL_MS);
+}
+document.addEventListener("visibilitychange", () => { if (!document.hidden && room && me) refresh(); });
+
+// ====== DERIVED DATA ======
+const ratingsFor = (n) => S.ratings.filter((r) => r.n === n).sort((a, b) => b.total - a.total);
+const myRating = (n) => S.ratings.find((r) => r.n === n && r.pid === slug(me));
+function avgFor(n) {
+  const rs = ratingsFor(n);
+  if (!rs.length) return null;
+  const cat = {};
+  CATS.forEach((c) => (cat[c.key] = rs.reduce((a, r) => a + r.scores[c.key], 0) / rs.length));
+  return { total: rs.reduce((a, r) => a + r.total, 0) / rs.length, cat, count: rs.length };
+}
+function namesFor(n) {
+  const votes = S.votes.filter((v) => v.n === n);
+  return S.names.filter((x) => x.n === n)
+    .map((x) => ({ ...x, votes: votes.filter((v) => v.nameId === x.id) }))
+    .sort((a, b) => b.votes.length - a.votes.length || a.at - b.at);
+}
+function titleFor(n) {
+  const top = namesFor(n)[0];
+  return top && top.votes.length ? top.text : `Cocktail #${n}`;
+}
+const fmt = (x) => (Math.round(x * 10) / 10).toString();
+const judges = () => new Set(S.ratings.map((r) => r.pid)).size;
+
+// ====== RENDER: cocktails tab ======
+function renderDrinks() {
+  const el = $("tabDrinks");
+  if (!S.cocktails.length) {
+    el.innerHTML = `<div class="empty"><div class="e">🍹</div><h2>No cocktails yet</h2>
+      <p class="muted">Add the first one when it hits the table.</p></div>
+      <button class="btn" onclick="addCocktail()">+ Add cocktail #1</button>`;
+    return;
+  }
+  el.innerHTML = S.cocktails.map(({ n }) => {
+    const avg = avgFor(n), mine = myRating(n);
+    return `<div class="card"><button class="ck" onclick="openCocktail(${n})">
+      <div class="num">${n}</div>
+      <div class="meta">
+        <div class="name">${esc(titleFor(n))}</div>
+        <div class="small muted">
+          ${mine ? `<span class="badge done">✓ You: ${mine.total}</span>` : `<span class="badge">Tap to rate</span>`}
+          ${avg ? `${avg.count} rated` : "No ratings yet"}
+        </div>
+      </div>
+      <div class="score">${avg ? `<b>${fmt(avg.total)}</b><div class="small muted">/ ${MAX}</div>` : `<span class="muted">—</span>`}</div>
+    </button></div>`;
+  }).join("") +
+  `<button class="btn ghost" onclick="addCocktail()">+ Add cocktail #${S.cocktails.length ? S.cocktails[S.cocktails.length - 1].n + 1 : 1}</button>`;
+}
+
+// ====== RENDER: leaderboard ======
+function renderBoard() {
+  const el = $("tabBoard");
+  const ranked = S.cocktails.map(({ n }) => ({ n, avg: avgFor(n) })).filter((x) => x.avg)
+    .sort((a, b) => b.avg.total - a.avg.total);
+  if (!ranked.length) {
+    el.innerHTML = `<div class="empty"><div class="e">🏆</div><h2>No scores yet</h2><p class="muted">Rate a cocktail and the leaderboard lights up.</p></div>`;
+    return;
+  }
+  const pod = (x, cls, medal) => x
+    ? `<div class="pod ${cls}" onclick="openCocktail(${x.n})"><div>${medal}</div><div class="p">${fmt(x.avg.total)}</div><div class="nmx">#${x.n} ${esc(titleFor(x.n))}</div></div>`
+    : `<div></div>`;
+  const best = {};
+  CATS.forEach((c) => (best[c.key] = Math.max(...ranked.map((x) => x.avg.cat[c.key]))));
+
+  el.innerHTML = `
+    <div class="podium">${pod(ranked[1], "s", "🥈")}${pod(ranked[0], "g", "🥇")}${pod(ranked[2], "b", "🥉")}</div>
+    <div class="card" style="overflow-x:auto">
+      <table>
+        <tr><th>Cocktail</th>${CATS.map((c) => `<th title="${c.label}">${c.icon}</th>`).join("")}<th>Total</th></tr>
+        ${ranked.map((x, i) => `<tr onclick="openCocktail(${x.n})" style="cursor:pointer">
+          <td><b>${i + 1}.</b> #${x.n} ${esc(titleFor(x.n))}<div class="small muted">${x.avg.count} judge${x.avg.count > 1 ? "s" : ""}</div></td>
+          ${CATS.map((c) => `<td class="${x.avg.cat[c.key] === best[c.key] ? "hi" : ""}">${fmt(x.avg.cat[c.key])}</td>`).join("")}
+          <td class="hi">${fmt(x.avg.total)}</td></tr>`).join("")}
+      </table>
+      <p class="small muted" style="margin:10px 0 0">Averages across ${judges()} judge${judges() !== 1 ? "s" : ""}. Green = best in category.</p>
+    </div>`;
+}
+
+// ====== DETAIL SHEET ======
+function openCocktail(n) {
+  openN = n;
+  const mine = myRating(n);
+  draft = {};
+  CATS.forEach((c) => (draft[c.key] = mine ? mine.scores[c.key] : 0));
+  $("notes").value = mine ? mine.notes : "";
+  $("saveRating").textContent = mine ? "Update my rating" : "Submit my rating";
+  $("newName").value = "";
+  renderForm();
+  renderSheetLive();
+  $("sheet").classList.remove("hidden");
+  $("sheet").scrollTop = 0;
+}
+function closeSheet() { openN = null; $("sheet").classList.add("hidden"); }
+
+function renderForm() {
+  $("rateForm").innerHTML = CATS.map((c) => `
+    <div class="cat"><div class="lbl"><span>${c.icon} ${c.label}</span><b>${draft[c.key] || "–"}</b></div>
+      <div class="pips">${Array.from({ length: 10 }, (_, i) => i + 1).map((v) =>
+        `<button class="${v === draft[c.key] ? "on" : v < draft[c.key] ? "fill" : ""}" onclick="setScore('${c.key}',${v})">${v}</button>`).join("")}
+      </div></div>`).join("");
+  $("myTotal").textContent = Object.values(draft).reduce((a, b) => a + b, 0);
+}
+function setScore(k, v) { draft[k] = v; renderForm(); }
+
+function renderSheetLive() {
+  if (openN == null) return;
+  const n = openN;
+  $("shNum").textContent = `Cocktail #${n}`;
+  $("shTitle").textContent = titleFor(n);
+
+  const myVote = S.votes.find((v) => v.n === n && v.pid === slug(me));
+  const names = namesFor(n);
+  $("nameList").innerHTML = names.length
+    ? names.map((x) => `<button class="nm ${myVote && myVote.nameId === x.id ? "mine" : ""}" onclick="vote('${x.id}')">
+        <span class="t">${esc(x.text)}<div class="who">by ${esc(x.by)}${x.votes.length ? " · " + x.votes.map((v) => esc(v.person)).join(", ") : ""}</div></span>
+        <span class="v">${x.votes.length} 🗳️</span></button>`).join("")
+    : `<p class="muted small">No names yet — be the legend who names it.</p>`;
+
+  const rs = ratingsFor(n);
+  $("allRatings").innerHTML = rs.length
+    ? rs.map((r) => `<div class="rv"><div class="h"><span>${esc(r.person)}</span><b>${r.total} / ${MAX}</b></div>
+        <div class="bars">${CATS.map((c) => `<span class="badge">${c.icon} ${r.scores[c.key]}</span>`).join("")}</div>
+        ${r.notes ? `<div class="note">${esc(r.notes)}</div>` : ""}</div>`).join("")
+    : `<p class="muted small" style="margin:0">Nobody's rated this one yet.</p>`;
+}
+
+// ====== ACTIONS ======
+async function addCocktail() {
+  try { const r = await api("cocktail", {}); toast(`Cocktail #${r.n} added 🍹`); await refresh(); }
+  catch (e) { toast(e.message); }
+}
+$("saveRating").onclick = async () => {
+  if (CATS.some((c) => !draft[c.key])) return toast("Score every category first");
+  const btn = $("saveRating"); btn.disabled = true;
+  try {
+    await api("rate", { n: openN, scores: draft, notes: $("notes").value });
+    toast("Rating shared with the hub ✅");
+    btn.textContent = "Update my rating";
+    await refresh();
+  } catch (e) { toast(e.message); }
+  btn.disabled = false;
+};
+$("addNameBtn").onclick = async () => {
+  const text = $("newName").value.trim();
+  if (!text) return;
+  try { await api("name", { n: openN, text }); $("newName").value = ""; toast("Name added + your vote cast"); await refresh(); }
+  catch (e) { toast(e.message); }
+};
+$("newName").addEventListener("keydown", (e) => { if (e.key === "Enter") $("addNameBtn").click(); });
+async function vote(nameId) {
+  try { await api("vote", { n: openN, nameId }); await refresh(); } catch (e) { toast(e.message); }
+}
+$("closeSheet").onclick = closeSheet;
+
+// ====== NAV / CHROME ======
+document.querySelectorAll("nav button").forEach((b) => (b.onclick = () => {
+  document.querySelectorAll("nav button").forEach((x) => x.classList.toggle("on", x === b));
+  $("tabDrinks").classList.toggle("hidden", b.dataset.tab !== "Drinks");
+  $("tabBoard").classList.toggle("hidden", b.dataset.tab !== "Board");
+}));
+$("shareBtn").onclick = async () => {
+  const link = `${location.origin}/?room=${room}`;
+  if (navigator.share) { try { await navigator.share({ title: "Cocktail Judges", text: "Join the judging panel 🍸", url: link }); } catch {} }
+  else { await navigator.clipboard.writeText(link); toast("Invite link copied"); }
+};
+$("meBtn").onclick = () => { showJoin(); };
+
+let toastT;
+function toast(msg) {
+  const t = $("toast"); t.textContent = msg; t.classList.remove("hidden");
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.add("hidden"), 2200);
+}
+function renderAll() { renderDrinks(); renderBoard(); renderSheetLive(); }
+
+// ====== JOIN ======
+function showJoin() {
+  $("app").classList.add("hidden");
+  $("join").classList.remove("hidden");
+  $("jName").value = me;
+  $("jRoom").value = room;
+}
+$("jGo").onclick = () => {
+  const n = $("jName").value.trim(), r = slug($("jRoom").value);
+  if (!slug(n)) return ($("jErr").textContent = "Pop your name in");
+  if (!r) return ($("jErr").textContent = "Pick a party code");
+  me = n; room = r;
+  localStorage.setItem("cj_name", me); localStorage.setItem("cj_room", room);
+  history.replaceState(null, "", `?room=${room}`);
+  start();
+};
+function start() {
+  $("join").classList.add("hidden");
+  $("app").classList.remove("hidden");
+  $("roomLbl").textContent = room;
+  $("meBtn").textContent = "👤 " + me;
+  refresh(); startPolling();
+}
+
+if (me && room) start(); else showJoin();
+</script>
+</body>
+</html>
